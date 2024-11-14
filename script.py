@@ -28,10 +28,6 @@ gender = input("Введіть стать студента (ч/ж): ").strip().l
 while gender not in ['ч', 'ж']:
     gender = input("Некоректний вибір. Будь ласка, введіть 'ч' для студента або 'ж' для студентки: ").strip().lower()
 
-# Папка для хранения сгенерированных страниц
-output_dir = 'generated_pages'
-os.makedirs(output_dir, exist_ok=True)
-
 # Шаблон для HTML-страниц
 html_template = '''
 <!DOCTYPE html>
@@ -40,7 +36,7 @@ html_template = '''
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -48,7 +44,7 @@ html_template = '''
             <h1>ЗВІТИ З ЛАБОРАТОРНИХ РОБІТ</h1>
             <h2>З ДИСЦИПЛІНИ «ІНТЕРНЕТ-ТЕХНОЛОГІЇ та ПРОЄКТУВАННЯ ВЕБ-ЗАСТОСУВАНЬ»</h2>
             <p>
-                {student_info}
+                {student_info} <!-- Добавлено поле для информации о студенте -->
             </p>
         </header>
         
@@ -71,7 +67,7 @@ html_template = '''
 </html>
 '''
 
-# Создание страниц
+# Создание страниц в корне
 for i in range(num_buttons):
     title = f'Сторінка {i + 1}: {button_names[i]}'
     
@@ -81,7 +77,7 @@ for i in range(num_buttons):
     )
 
     # Генерация ссылок для бокового меню
-    sidebar_links = ''.join(f'<a href="{"index.html" if j == 0 else f"page_{j + 1}.html"}" class="sidebar-button">{button_names[j]}</a>' for j in range(num_buttons))
+    sidebar_links = ''.join(f'<a href="page_{j + 1}.html" class="sidebar-button">{button_names[j]}</a>' for j in range(num_buttons))
 
     # Формирование информации о студенте
     if gender == 'ч':
@@ -101,12 +97,9 @@ for i in range(num_buttons):
     else:  # Страница с изображением
         content = '''
             <div class="image-box">
-                <img src="example-image.jpg" alt="Приклад зображення" class="responsive-image">
+                <img src="example-image.png" alt="Приклад зображення" class="responsive-image">
             </div>
         '''
-
-    # Определение имени файла (первый файл - index.html)
-    file_name = 'index.html' if i == 0 else f'page_{i + 1}.html'
 
     # Заполнение шаблона
     page_content = html_template.format(
@@ -114,11 +107,11 @@ for i in range(num_buttons):
         lab_buttons=lab_buttons,
         sidebar_links=sidebar_links,
         content=content,
-        student_info=student_info
+        student_info=student_info  # Передача информации о студенте в шаблон
     )
 
-    # Сохранение страницы
-    with open(os.path.join(output_dir, file_name), 'w', encoding='utf-8') as f:
+    # Сохранение страницы в корне
+    with open(f'page_{i + 1}.html', 'w', encoding='utf-8') as f:
         f.write(page_content)
 
-print(f'Сгенеровано {num_buttons} сторінок у папці "{output_dir}".')
+print(f'Сгенеровано {num_buttons} сторінок у кореневій папці.')
