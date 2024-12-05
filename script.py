@@ -1,34 +1,85 @@
 import os
+import json
 
-# Задаем параметры
-num_buttons = int(input("Введіть кількість кнопок у боковому меню: "))
-button_names = []
-content_types = []
+# Функція для завантаження конфігурації з файлу
+def load_config(filename='config.json'):
+    if os.path.exists(filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        return {}
 
-for i in range(num_buttons):
-    name = input(f"Введіть назву для кнопки {i + 1}: ")
-    button_names.append(name)
-    
-    # Изменяем ввод типа контента на числовой
-    content_type = int(input("Виберіть тип контенту для кнопки (1 - текст, 2 - зображення): "))
-    while content_type not in [1, 2]:
-        content_type = int(input("Некоректний вибір. Будь ласка, введіть '1' для тексту або '2' для зображення: "))
-    content_types.append(content_type)
+# Перевірка наявності файлу конфігурації
+config = load_config()
 
-# Ввод ссылок для верхнего блока кнопок
-lab_links = []
-for i in range(9):
-    link = input(f"Введіть посилання для лабораторної роботи №{i + 1}: ")
-    lab_links.append(link)
+# Якщо файл існує і містить параметри, використовуємо їх, інакше запитуємо в користувача
+if config:
+    print("Конфігурація завантажена з файлу.\n")
+else:
+    print("Конфігураційний файл не знайдено, будуть використовуватись значення за замовчуванням.\n")
 
-# Ввод дополнительной информации
-group_name = input("Введіть назву групи: ")
-full_name = input("Введіть ПІБ: ")
-gender = input("Введіть стать студента (ч/ж): ").strip().lower()
-while gender not in ['ч', 'ж']:
-    gender = input("Некоректний вибір. Будь ласка, введіть 'ч' для студента або 'ж' для студентки: ").strip().lower()
+# Запит на кількість кнопок, якщо не задано в конфігурації
+num_buttons = config.get('num_buttons')
+if not num_buttons:
+    num_buttons = int(input("Введіть кількість кнопок у боковому меню: "))
+else:
+    print(f"Кількість кнопок задана в файлі: {num_buttons}")
 
-# Шаблон для HTML-страниц
+# Запит на назви кнопок, якщо не задано в конфігурації
+button_names = config.get('button_names')
+if not button_names:
+    button_names = []
+    for i in range(num_buttons):
+        name = input(f"Введіть назву для кнопки {i + 1}: ")
+        button_names.append(name)
+else:
+    print(f"Назви кнопок задані в файлі: {', '.join(button_names)}")
+
+# Запит на тип контенту для кожної кнопки, якщо не задано в конфігурації
+content_types = config.get('content_types')
+if not content_types:
+    content_types = []
+    for i in range(num_buttons):
+        content_type = int(input("Виберіть тип контенту для кнопки (1 - текст, 2 - зображення): "))
+        while content_type not in [1, 2]:
+            content_type = int(input("Некоректний вибір. Будь ласка, введіть '1' для тексту або '2' для зображення: "))
+        content_types.append(content_type)
+else:
+    print(f"Типи контенту для кнопок задані в файлі: {', '.join(map(str, content_types))}")
+
+# Запит на посилання для лабораторних робіт, якщо не задано в конфігурації
+lab_links = config.get('lab_links')
+if not lab_links:
+    lab_links = []
+    for i in range(9):
+        link = input(f"Введіть посилання для лабораторної роботи №{i + 1}: ")
+        lab_links.append(link)
+else:
+    print(f"Посилання на лабораторні роботи задані в файлі.")
+
+# Запит на групу та ПІБ, якщо не задано в конфігурації
+group_name = config.get('group_name')
+if not group_name:
+    group_name = input("Введіть назву групи: ")
+else:
+    print(f"Назва групи задана в файлі: {group_name}")
+
+full_name = config.get('full_name')
+if not full_name:
+    full_name = input("Введіть ПІБ: ")
+else:
+    print(f"ПІБ задано в файлі: {full_name}")
+
+# Запит на стать, якщо не задано в конфігурації
+gender = config.get('gender')
+if not gender:
+    gender = input("Введіть стать студента (ч/ж): ").strip().lower()
+    while gender not in ['ч', 'ж']:
+        gender = input("Некоректний вибір. Будь ласка, введіть 'ч' для студента або 'ж' для студентки: ").strip().lower()
+else:
+    print(f"Стать студента задана в файлі: {gender}")
+
+# Шаблон для HTML-сторінок
 html_template = '''
 <!DOCTYPE html>
 <html lang="uk">
@@ -67,26 +118,31 @@ html_template = '''
 </html>
 '''
 
-# Создание страниц в корне
+# Створення сторінок
 for i in range(num_buttons):
-    title = f'Сторінка {i + 1}: {button_names[i]}'
+    title = f'Сторінка {i + 1}: {button_names[i]}' if button_names else f'Сторінка {i + 1}'
     
-    # Генерация кнопок для верхнего блока
+    # Генерація кнопок для верхнього блоку
     lab_buttons = ''.join(
-        f'<a href="{lab_links[j]}" class="lab-button">Лабораторна робота №{j + 1}</a>' for j in range(9)
+        f'<a href="{lab_links[j]}" class="lab-button">Лабораторна робота №{j + 1}</a>' for j in range(len(lab_links))
     )
 
-    # Генерация ссылок для бокового меню
-    sidebar_links = ''.join(f'<a href="page_{j + 1}.html" class="sidebar-button">{button_names[j]}</a>' for j in range(num_buttons))
+    # Генерація посилань для бокового меню
+    # Генерація посилань для бокового меню
+    sidebar_links = ''.join(
+    	f'<a href="page_{j + 1}.html" class="sidebar-button">{button_names[j]}</a>' if j > 0 else f'<a href="index.html" class="sidebar-button">{button_names[j]}</a>'
+    	for j in range(num_buttons)
+    )
 
-    # Формирование информации о студенте
+
+    # Формування інформації про студента
     if gender == 'ч':
         student_info = f"Виконав студент групи {group_name} {full_name}"
     else:
         student_info = f"Виконала студентка групи {group_name} {full_name}"
 
-    # Контент страницы (текст или изображение)
-    if content_types[i] == 1:  # Текстовая страница
+    # Контент сторінки (текст або зображення)
+    if content_types[i] == 1:  # Текстова сторінка
         content = f'''
             <div class="info-box">
                 <h3>Місце виведення інформації для {button_names[i]}</h3>
@@ -94,24 +150,27 @@ for i in range(num_buttons):
                 <p>Приклад тексту з <a href="#">посиланням</a> на зовнішній ресурс.</p>
             </div>
         '''
-    else:  # Страница с изображением
+    else:  # Сторінка з зображенням
         content = '''
             <div class="image-box">
                 <img src="example-image.png" alt="Приклад зображення" class="responsive-image">
             </div>
         '''
 
-    # Заполнение шаблона
+    # Заповнення шаблону
     page_content = html_template.format(
         title=title,
         lab_buttons=lab_buttons,
         sidebar_links=sidebar_links,
         content=content,
-        student_info=student_info  # Передача информации о студенте в шаблон
+        student_info=student_info  # Передача інформації про студента в шаблон
     )
 
-    # Сохранение страницы в корне
-    with open(f'page_{i + 1}.html', 'w', encoding='utf-8') as f:
+    # Ім'я файлу: перша сторінка — index.html, інші — page_2.html, page_3.html і т.д.
+    file_name = 'index.html' if i == 0 else f'page_{i + 1}.html'
+
+    # Збереження сторінки
+    with open(file_name, 'w', encoding='utf-8') as f:
         f.write(page_content)
 
 print(f'Сгенеровано {num_buttons} сторінок у кореневій папці.')

@@ -1,0 +1,19 @@
+{
+  "num_buttons": 3,
+  "button_names": ["Лабораторна 1", "Лабораторна 2", "Лабораторна 3"],
+  
+  "lab_links": [
+    "http://lab1.com",
+    "http://lab2.com",
+    "http://lab3.com",
+    "http://lab4.com",
+    "http://lab5.com",
+    "http://lab6.com",
+    "http://lab7.com",
+    "http://lab8.com",
+    "http://lab9.com"
+  ],
+  "group_name": "ІТ-01",
+  "full_name": "Іванов Іван Іванович",
+  "gender": "ч"
+}
